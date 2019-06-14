@@ -24,45 +24,44 @@ app.use(express.static('public'));
 // TODO(you): Add at least 1 GET route and 1 POST route.
 async function onGet(req, res) {
 	const id=req.params.id
-	const properties=await new Promise((resolve) => {
-		authenticate(c,p).then((oauth2Client) => {
-			const sheets = googleapis.sheets('v4');
-			sheets.spreadsheets.get({
-				auth: oauth2Client,
-				spreadsheetId: SPREADSHEET_ID
-			}, function(err, response) {
-				if (err) {
-					console.log('The API returned an error: ' + err);
-					resolve( {error: err} );
-					return;
-				}
-				resolve(response)
+	const mode=req.params.mode
+	console.log(id+':get mode:'+mode)
+	if(mode==='getid')
+	{
+		const properties=await new Promise((resolve) => {
+			authenticate(c,p).then((oauth2Client) => {
+				const sheets = googleapis.sheets('v4');
+				sheets.spreadsheets.get({
+					auth: oauth2Client,
+					spreadsheetId: SPREADSHEET_ID
+				}, function(err, response) {
+					if (err) {
+						console.log('The API returned an error: ' + err);
+						resolve( {error: err} );
+						return;
+					}
+					resolve(response)
+				});
 			});
 		});
-	});
-	const sids=[]
-	const titles=[]
-	properties.sheets.forEach(sheet=>{
-		let title=sheet.properties.title
-		let sid=sheet.properties.sheetId
-		titles.push(title)
-		sids.push(sid)
-	})
-	let idx=titles.findIndex(item=>{return id===item})
-	if(idx===-1)
-		returnjson={'error':'notfound'}
-	else
-		returnjson={'sheetid':sids[idx]}
-	res.json(returnjson)
-}
-app.get('/:id', onGet)
-
-async function onPost(req, res) {
-	const messageBody = req.body
-	const id=req.params.id
-	if(messageBody.mode.toLowerCase()!=='newdiary')
+		const sids=[]
+		const titles=[]
+		properties.sheets.forEach(sheet=>{
+			let title=sheet.properties.title
+			let sid=sheet.properties.sheetId
+			titles.push(title)
+			sids.push(sid)
+		})
+		let idx=titles.findIndex(item=>{return id===item})
+		if(idx===-1)
+			res.json({'error':'notfound'})
+		else
+			res.json({'sheetid':sids[idx]})
+		return
+	}
+	else if(mode==='getname'||mode==='getdiary')
 	{
-		var response=await new Promise((resolve) => {
+		const response=await new Promise((resolve) => {
 			authenticate(c, p).then((oauth2Client) => {
 				const sheets = googleapis.sheets('v4');
 				sheets.spreadsheets.values.get({
@@ -88,97 +87,14 @@ async function onPost(req, res) {
 			res.json({'error':'Communication error/Invalid ID'})
 			return
 		}
-		var rows=response.rows
-	}
-	const mode=messageBody.mode
-	console.log(id+':post mode:'+mode)
-	if(messageBody.mode!==undefined)
-	{
-		const mode=messageBody.mode//getname,getdiary,newsheet,sortsheet...
-		if(mode.toLowerCase()==='getname')
+		const rows=response.rows
+		
+		if(mode==='getname')
 		{
 			res.json({'name':rows[0][0]})
-			console.log(id+':fetch data for user:'+rows[0][0])
 			return
 		}
-		else if(mode.toLowerCase()==='newdiary')//createsheet
-		{
-			const name=messageBody.name
-			if(name===undefined)
-			{
-				res.json({'error':'no name in request'})
-				return
-			}
-			if(name.length===0)
-			{
-				res.json({'error':'invalid name'})
-				return
-			}
-			row=[name]
-			const response=await new Promise((resolve)=>{
-				authenticate(c,p).then((oauth2Client)=>{
-					const sheets=googleapis.sheets('v4');
-					sheets.spreadsheets.batchUpdate({
-					auth:oauth2Client,
-					spreadsheetId:SPREADSHEET_ID,
-					resource:
-					{
-						"requests":[
-						{
-							"addSheet":
-							{
-								"properties":
-								{
-									"title":id
-								}
-							}
-						}
-						]
-					}
-					},function(err,response){
-						if(err)
-						{
-							console.log('The API returned an error:'+err);
-							resolve({error:err});
-							return;
-						}
-						resolve(response);
-						const setname=new Promise((resolve) => {
-							const rowNumber = 1;
-							const range = `${rowNumber}:${rowNumber}`;
-							authenticate(c, p).then((oauth2Client) => {
-								const sheets = googleapis.sheets('v4');
-								sheets.spreadsheets.values.update(
-								{
-									valueInputOption: 'RAW',
-									auth: oauth2Client,
-									spreadsheetId: SPREADSHEET_ID,
-									range: id+'!'+range,
-									resource:
-									{
-										range: id+'!'+range,
-										values: [row],
-										majorDimension: 'ROWS'
-									}
-								}, function(err, response) {
-									if (err) 
-									{
-										console.log('The API returned an error: ' + err);
-										resolve({error: err});
-										return;
-									}
-									resolve({'response':'success'});
-								});
-							});
-						});
-					});
-				});
-			});
-			//remember to return sheet id
-			res.json({'sheetid':response.replies[0].addSheet.properties.sheetId})
-			return
-		}
-		else if(mode.toLowerCase()==='getdiary')
+		else if(mode==='getdiary')
 		{
 			let diary=[]
 			for(let i=1,l=rows.length;i<l;i++)
@@ -189,57 +105,142 @@ async function onPost(req, res) {
 			res.json({'diary':diary})
 			return
 		}
-		else if(mode.toLowerCase()==='sort')
+	}
+	else if(mode.toLowerCase()==='sort')
+	{
+		const sIdx=parseInt(req.params.sheetid)
+		if(isNaN(sIdx))
 		{
-			const sIdx=parseInt(messageBody.sheetid)
-			if(isNaN(sIdx))
-			{
-				res.json({'error':'no sheet id in request'})
-				return
-			}
-			const response=new Promise((resolve)=>{
-				authenticate(c,p).then((oauth2Client)=>{
-					const sheets=googleapis.sheets('v4');
-					sheets.spreadsheets.batchUpdate({
-					auth:oauth2Client,
-					spreadsheetId:SPREADSHEET_ID,
-					resource:
-					{
-						"requests":[
-							{
-								"sortRange":
-								{
-									"range":
-									{
-										"sheetId":sIdx,
-										"startRowIndex":1,
-										"startColumnIndex": 0,
-										"endColumnIndex": 2
-									},
-									"sortSpecs":[
-									{
-										"sortOrder":"ASCENDING",
-										"dimensionIndex":0
-									}
-									]
-								}
-							}
-						]
-					}
-					},function(err,response){
-						if(err)
+			res.json({'error':'no sheet id'})
+			return
+		}
+		const response=new Promise((resolve)=>{
+			authenticate(c,p).then((oauth2Client)=>{
+				const sheets=googleapis.sheets('v4');
+				sheets.spreadsheets.batchUpdate({
+				auth:oauth2Client,
+				spreadsheetId:SPREADSHEET_ID,
+				resource:
+				{
+					"requests":[
 						{
-							console.log('TheAPIreturnedanerror:'+err);
-							resolve({error:err});
-							return;
+						"sortRange":
+								{
+								"range":
+								{
+									"sheetId":sIdx,
+									"startRowIndex":1,
+									"startColumnIndex": 0,
+									"endColumnIndex": 2
+								},
+								"sortSpecs":[
+								{
+									"sortOrder":"ASCENDING",
+									"dimensionIndex":0
+								}
+								]
+							}
 						}
-						resolve({'response':'success'});
+					]
+				}
+				},function(err,response){
+					if(err)
+					{
+						console.log('TheAPIreturnedanerror:'+err);
+						resolve({error:err});
+						return;
+					}
+					resolve({'response':'success'});
+				});
+			});
+		});
+		res.json(response)
+		return
+	}
+}
+app.get('/:id/:mode/:sheetid', onGet)
+
+async function onPost(req, res) {
+	const messageBody = req.body
+	const id=req.params.id
+	const mode=messageBody.mode
+	console.log(id+':post mode:'+mode)
+	if(messageBody.mode==='newdiary')
+	{
+		const name=messageBody.name
+		if(name===undefined)
+		{
+			res.json({'error':'no name in request'})
+			return
+		}
+		if(name.length===0)
+		{
+			res.json({'error':'invalid name'})
+			return
+		}
+		row=[name]
+		const response=await new Promise((resolve)=>{
+			authenticate(c,p).then((oauth2Client)=>{
+				const sheets=googleapis.sheets('v4');
+				sheets.spreadsheets.batchUpdate({
+				auth:oauth2Client,
+				spreadsheetId:SPREADSHEET_ID,
+				resource:
+				{
+					"requests":[
+					{
+						"addSheet":
+						{
+							"properties":
+							{
+								"title":id
+							}
+						}
+					}
+					]
+				}
+				},function(err,response){
+					if(err)
+					{
+						console.log('The API returned an error:'+err);
+						resolve({error:err});
+						return;
+					}
+					resolve(response);
+					const setname=new Promise((resolve) => {
+						const rowNumber = 1;
+						const range = `${rowNumber}:${rowNumber}`;
+						authenticate(c, p).then((oauth2Client) => {
+							const sheets = googleapis.sheets('v4');
+							sheets.spreadsheets.values.update(
+							{
+								valueInputOption: 'RAW',
+								auth: oauth2Client,
+								spreadsheetId: SPREADSHEET_ID,
+								range: id+'!'+range,
+								resource:
+								{
+									range: id+'!'+range,
+									values: [row],
+									majorDimension: 'ROWS'
+								}
+							}, function(err, response) {
+								if (err) 
+								{
+									console.log('The API returned an error: ' + err);
+									resolve({error: err});
+									return;
+								}
+								resolve({'response':'success'});
+							});
+						});
 					});
 				});
 			});
-			res.json(response)
-			return
-		}
+		});
+		//remember to return sheet id
+		res.json({'sheetid':response.replies[0].addSheet.properties.sheetId})
+		return
 	}
 	res.json({})
 }
@@ -322,16 +323,21 @@ async function onDelete(req, res) {//delete entire sheet
 		titles.push(title)
 		sids.push(sid)
 	})
+	if(sids.length===1)
+	{
+		res.json({'error':'Can\'t delete last user from database'})
+		return
+	}
 	const sidx=sids.findIndex(item=>{return item===sheetId})
 	if(sidx===-1||titles[sidx]!==id)
 	{
-		console.log('ID not match')
+		console.log(id+':ID not match')
 		res.json({'error':'ID not match,please refresh page.'})
 		return
 	}
 	else
 	{
-		console.log('ID match,delete ID:'+id)
+		console.log(id+':ID match,deleted')
 		const response=new Promise((resolve)=>{
 				authenticate(c,p).then((oauth2Client)=>{
 					const sheets=googleapis.sheets('v4');
@@ -352,7 +358,7 @@ async function onDelete(req, res) {//delete entire sheet
 					},function(err,response){
 						if(err)
 						{
-							console.log('TheAPIreturnedanerror:'+err);
+							console.log('The API returned an error:'+err);
 							resolve({error:err});
 							return;
 						}

@@ -4,8 +4,94 @@
 body{
 	margin:0;
 	background-color:#fdf5f5;
+	font-family:'Merriweather', serif;
+	text-align:center;
+	height:89vh;
+}
+.inactive{
+	display:none !important;
+}
+#errorMsg{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	color:red;
+	background-color:darkgray;
+}
+.title{
+	font-size:30pt;
+	margin-top:10vh;
+	line-height:3em;
+}
+.subtitle{
+	font-family:'Montserrat', sans-serif;
+	font-size:16pt;
+	line-height:2em;
+}
+#prompt{
+	height:3em;
 }
 
-.inactive{
-	display:none;
+.button{
+	border:black 2px solid;
+	background-color:white;
+	width:40vw;
+	height:10vh;
+}
+@keyframes btnAnim{
+	from{color:black;background-color:white;}
+	to{color:white;background-color:black;}
+}
+.button:hover{
+	animation:btnAnim .25s;
+}
+.menu-item{
+	display: flex;
+	flex-direction: column;
+	width: 40vw;
+	margin: 20pt auto 20pt auto;
+}
+.menu-input{
+	margin-top: 10pt;
+	height: 3vh;
+	font-family: 'Merriweather', serif;
+	font-size: 14pt;
+}
+#viewJournal{
+	margin-bottom:40px;
+}
+#textfield{
+	font-size:14pt;
+	line-height:1.5em;
+	border:0px;
+	margin-top:5vh;
+	width: 60vw;
+	overflow: hidden;
+	height: 45vh;
+	background-color:#fefafa;
+}
+#navigator{
+	background-color: white;
+	width: 100vw;
+	height: 48px;
+	display: flex;
+	flex: 1 1 auto;
+	position:absolute;
+	bottom:15px;
+}
+.flex-item{
+	margin:auto;
+}
+#backHome{
+	border:0px;
+	background-color:white;
+}
+#uid{
+	bottom: 0px;
+	position: absolute;
+	font-size: 5pt;
+	left: 0;
+	right: 0;
+	background-color:white;
 }

@@ -7,6 +7,7 @@ class App
 		this.id=this.getId()
 		this.diary=new Diary(diaryElem)
 		this.eMsg=document.querySelector('#errorMsg')
+		this.resize()
 		document.querySelector('#newJournal').addEventListener('click',()=>this.newUser())
 		document.querySelector('#findJournal').addEventListener('click',()=>this.oldUser())
 		document.querySelector('#viewJournal').addEventListener('click',()=>this.toDiary())
@@ -14,8 +15,8 @@ class App
 		this.elem.addEventListener('tohome',()=>this.toHome())
 		if(this.id!==null)
 		{
-			const opt={'method':'GET'}
-			fetch('/'+escape(this.id),opt).then(response=>{return response.json()}).then(json=>{//check valid id
+			const getOpt={'method':'GET'}
+			fetch('/'+escape(this.id)+'/getid/0',getOpt).then(response=>{return response.json()}).then(json=>{//check valid id
 				if(json.error===undefined)
 				{
 					this.sheetId=json.sheetid
@@ -33,13 +34,14 @@ class App
 					this.eMsg.classList.remove('inactive')
 				}
 			}).catch(()=>console.error('get ids error'))
-			const name_opt={'method':'POST','body':'{\"mode\":\"getname\"}','headers':{'Accept':'application/json','Content-Type':'application/json'}}
-			fetch('/'+this.id,name_opt).then(response=>{return response.json()}).then(json=>{
+			fetch('/'+this.id+'/getname/0',getOpt).then(response=>{return response.json()}).then(json=>{
 				document.querySelector('#welcomeMsg').innerText='Welcome back '+unescape(json.name)
 			}).catch(()=>console.error('get name error'))
 			this.elem.querySelector('#newuser').classList.add('inactive')
 			this.elem.querySelector('#olduser').classList.remove('inactive')
 		}
+		window.addEventListener('resize',this.resize)
+		console.log('DEMO ID:8c71b2a6-64b6-489b-9f65-6c0bedecb12d')
 	}
 	
 	newUser()
@@ -84,10 +86,11 @@ class App
 			const old_id=escape(document.querySelector('#uid-input').value)
 			if(old_id.length===0)
 				return
-			const opt={'method':'GET'}
-			fetch('/'+escape(old_id),opt).then(response=>{return response.json()}).then(json=>{
+			const getOpt={'method':'GET'}
+			fetch('/'+escape(old_id)+'/getid/0',getOpt).then(response=>{return response.json()}).then(json=>{
 				if(json.error===undefined)
 				{
+					this.id=old_id
 					this.sheetId=json.sheetid
 					var expire=new Date()
 					expire.setTime(expire.getTime()+(365*86400000))
@@ -95,8 +98,8 @@ class App
 					document.querySelector('#uid').innerText='USER:'+old_id
 					this.diary.setId(old_id,this.sheetId)
 					this.toDiary()
-					const name_opt={'method':'POST','body':'{\"mode\":\"getname\"}','headers':{'Accept':'application/json','Content-Type':'application/json'}}
-					fetch('/'+old_id,name_opt).then(response=>{return response.json()}).then(json=>{
+					const name_opt={'method':'GET'}
+					fetch('/'+old_id+'/getname/0',name_opt).then(response=>{return response.json()}).then(json=>{
 						document.querySelector('#welcomeMsg').innerText='Welcome back '+unescape(json.name)
 					}).catch(()=>console.error('get name error'))
 					this.elem.querySelector('#newuser').classList.add('inactive')
@@ -145,6 +148,7 @@ class App
 		this.diary.show()
 		this.eMsg.innerText=''
 		this.eMsg.classList.add('inactive')
+		this.eMsg.classList.remove('warn')
 	}
 	toHome()
 	{
@@ -178,4 +182,48 @@ class App
 	
 	show=()=>this.elem.classList.remove('inactive')
 	hide=()=>this.elem.classList.add('inactive')
+	resize=()=>{
+			const vw=window.innerWidth
+			const vh=window.innerHeight
+			if(vw<=500)
+			{
+				this.diary.promptText.style.fontSize='14pt'
+				this.diary.textfield.style.width='99vw'
+			}
+			else if(vw>500&&vw<=800)
+			{
+				this.diary.promptText.style.fontSize='16pt'
+				this.diary.textfield.style.width='80vw'
+			}
+			else
+			{
+				this.diary.promptText.style.fontSize='16pt'
+				this.diary.textfield.style.width='60vw'
+			}
+			const titles=document.getElementsByClassName('title')
+			const buttons=document.getElementsByClassName('button')
+			if(vh<=900)
+			{
+				for(let i=0;i<titles.length;i++)
+				{
+					titles[i].style.marginTop='5vh'
+					titles[i].style.fontSize='20pt'
+				}
+				for(let i=0;i<buttons.length;i++)
+					buttons[i].style.fontSize='10pt'
+				this.eMsg.style.fontSize='0.8em'
+			}
+			else
+			{
+				for(let i=0;i<titles.length;i++)
+				{
+					titles[i].style.marginTop='10vh'
+					titles[i].style.fontSize='30pt'
+					buttons[i].style.fontSize='16pt'
+				}
+				for(let i=0;i<buttons.length;i++)
+					buttons[i].style.fontSize='16pt'
+				this.eMsg.style.fontSize='1em'
+			}
+		}
 }

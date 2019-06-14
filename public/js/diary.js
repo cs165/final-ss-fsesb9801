@@ -31,12 +31,8 @@ class Diary
 				item=item.replace(/'/g,"").replace("\n","")
 				this.PROMPTS.push(item)
 			})
-			if(this.date.getMonth()===3&&this.date.getDate()===1)
-				this.promptText.innerText='Upgrade to PRO,only $3.99/month!'
-			else
-				this.promptText.innerText=this.PROMPTS[parseInt(this.date.getTime()/86400000)%this.PROMPTS.length]
+			this.promptText.innerText=this.PROMPTS[parseInt(this.date.getTime()/86400000)%this.PROMPTS.length]
 		})
-		const opt={'method':'POST','body':'{\"mode\":\"getdiary\"}','headers':{'Accept':'application/json','Content-Type':'application/json'}}
 	}
 	
 
@@ -53,8 +49,8 @@ class Diary
 			fetch('/'+this.id+'/'+this.entry.diary.length,opt).then(response=>{return response.json()}).then(json=>{
 				if(json.error!=undefined)
 					console.error(json.error)
-				const sort_opt={'method':'POST','body':'{\"mode\":\"sort\",\"sheetid\":\"'+this.sheetId+'\"}','headers':{'Accept':'application/json','Content-Type':'application/json'}}
-				fetch('/'+this.id,sort_opt).then(response=>{return response.json()}).then(json=>{
+				const getOpt={'method':'GET'}
+				fetch('/'+this.id+'/sort/'+this.sheetId,getOpt).then(response=>{return response.json()}).then(json=>{
 					if(json.error!==undefined)
 						console.error(json.error)
 				})
@@ -75,8 +71,8 @@ class Diary
 	{
 		this.id=id
 		this.sheetId=sheetid
-		const opt={'method':'POST','body':'{\"mode\":\"getdiary\"}','headers':{'Accept':'application/json','Content-Type':'application/json'}}
-		fetch('/'+this.id,opt).then(response=>{return response.json()}).then(json=>{
+		const getOpt={'method':'GET'}
+		fetch('/'+this.id+'/getdiary/0',getOpt).then(response=>{return response.json()}).then(json=>{
 				this.entry=json
 				
 				let di=this.entry.diary.findIndex(item=>{return item[0].replace(/"/g,'')===this.toDBDateString(this.date)})

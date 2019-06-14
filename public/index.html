@@ -17,34 +17,36 @@
 	<div id='home'>
 		<span id='errorMsg' class='inactive'></span>
 		<div id='newuser'>
-			<div>Create a Daily Journal</div>
-			<p>Note:Your journal will be viewable and editable to anyone who has the ID!</p>
-			<div>
-				<button id='newJournal'>CREATE A NEW JOURNAL</button>
-				<input id='uname-input' placeholder='Your name is...' class='inactive' />
+			<div class='title'>Create a Daily Journal</div>
+			<p class='subtitle'>Note:Your journal will be viewable and editable to anyone who has the ID!</p>
+			<div class='menu-item'>
+				<button id='newJournal' class='button subtitle'>CREATE A NEW JOURNAL</button>
+				<input id='uname-input' placeholder='Your name is...' class='inactive menu-input' />
 			</div>
-			<div>
-				<button id='findJournal'>EXISTING USER?</button>
-				<input id='uid-input' placeholder='Your ID is...' class='inactive' />
+			<div class='menu-item'>
+				<button id='findJournal' class='button subtitle'>OLD USER?</button>
+				<input id='uid-input' placeholder='Your ID is...' class='inactive menu-input' />
 			</div>
 		</div>
 		<div id='olduser' class='inactive'>
-			<div id='welcomeMsg'>Welcome back USERNAME!</div>
-			<button id='viewJournal'>VIEW MY JOURNAL</button>
-			<button id='obliterator'>DELETE MY JOURNAL</button>
+			<div id='welcomeMsg' class='title'>Welcome back USERNAME!</div>
+			<div class='menu-item'>
+				<button id='viewJournal' class='button subtitle'>VIEW MY JOURNAL</button>
+				<button id='obliterator' class='button subtitle'>DELETE MY JOURNAL</button>
+			</div>
 		</div>
 	</div>
 	<div id='diary' class='inactive'>
 		<div id='journal'>
-			<div id='date'></div>
-			<div id='prompt'></div>
-			<textarea id='textfield' rows=6 cols=50></textarea>
+			<div id='date' class='title'></div>
+			<div id='prompt' class='subtitle'></div>
+			<textarea id='textfield'></textarea>
 		</div>
 		<div id='navigator'>
-			<img id='back' src=''></img>
-			<button id='backHome'>HOME</button>
-			<img id='forward' src=''></img>
-			<img id='check' src='' class='inactive'></img>
+			<img id='back' src='' class='flex-item'></img>
+			<button id='backHome' class='subtitle flex-item'>HOME</button>
+			<img id='forward' src='' class='flex-item'></img>
+			<img id='check' src='' class='inactive flex-item'></img>
 		</div>
 	</div>
 	<div id='uid'>USER:</div>
