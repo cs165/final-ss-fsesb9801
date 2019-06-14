@@ -1,3 +1,11 @@
 /**
  * TODO(you): Add the CSS necessary to complete your final project.
  **/
+body{
+	margin:0;
+	background-color:#fdf5f5;
+}
+
+.inactive{
+	display:none;
+}

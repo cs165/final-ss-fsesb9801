@@ -4,11 +4,49 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title>CS193x Final Project</title>
+	<link href="https://fonts.googleapis.com/css?family=Merriweather|Montserrat&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css"/>
+	<script src="js/navigator.js" defer></script>
+	<script src="js/diary.js" defer></script>
+	<script src="js/app.js" defer></script>
     <script src="js/script.js" defer></script>
     </script>
   </head>
   <body>
     <!-- TODO(you): Add the HTML necessary to complete your final project. -->
+	<div id='home'>
+		<span id='errorMsg' class='inactive'></span>
+		<div id='newuser'>
+			<div>Create a Daily Journal</div>
+			<p>Note:Your journal will be viewable and editable to anyone who has the ID!</p>
+			<div>
+				<button id='newJournal'>CREATE A NEW JOURNAL</button>
+				<input id='uname-input' placeholder='Your name is...' class='inactive' />
+			</div>
+			<div>
+				<button id='findJournal'>EXISTING USER?</button>
+				<input id='uid-input' placeholder='Your ID is...' class='inactive' />
+			</div>
+		</div>
+		<div id='olduser' class='inactive'>
+			<div id='welcomeMsg'>Welcome back USERNAME!</div>
+			<button id='viewJournal'>VIEW MY JOURNAL</button>
+			<button id='obliterator'>DELETE MY JOURNAL</button>
+		</div>
+	</div>
+	<div id='diary' class='inactive'>
+		<div id='journal'>
+			<div id='date'></div>
+			<div id='prompt'></div>
+			<textarea id='textfield' rows=6 cols=50></textarea>
+		</div>
+		<div id='navigator'>
+			<img id='back' src=''></img>
+			<button id='backHome'>HOME</button>
+			<img id='forward' src=''></img>
+			<img id='check' src='' class='inactive'></img>
+		</div>
+	</div>
+	<div id='uid'>USER:</div>
   </body>
 </html>
