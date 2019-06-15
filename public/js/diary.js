@@ -69,6 +69,7 @@ class Diary
 	}
 	setId(id,sheetid)
 	{
+		this.textfield.value=''
 		this.id=id
 		this.sheetId=sheetid
 		const getOpt={'method':'GET'}
